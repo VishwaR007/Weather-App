@@ -5,17 +5,23 @@ import RowText from "../components/RowText";
 // If we are importing a component no need of using courly bracess, but if we are importing an object we need use courly bracess.
 import { weatherType } from "../utilities/weatherType";
 
-const CurrentWeather = () => {
-  const {wrapper, container, temp, feels, highLow, highLowWrapper, bodyWrapper, discription, message} = styles
+const CurrentWeather = ({weatherData}) => {
+  const {wrapper, container, tempStyles, feels, highLow, highLowWrapper, bodyWrapper, discription, message} = styles
+  // console.log(`CurrentWeather Data : ${weatherData}`);
+
+  const { main: {temp, feels_like, temp_max, temp_min}, weather } = weatherData
+
+  const weatherCondition = weather[0]?.main
+
   return(
-    <SafeAreaView style={wrapper}>
+    <SafeAreaView style={[wrapper, {backgroundColor: weatherType[weatherCondition].backgroundColor}]}>
       <View style={container}>
-        <Feather name="sun" size={100} color="black" />
-        <Text style={temp}>6</Text>
-        <Text style={feels}>Feels like 5</Text>
-        <RowText messageOne={'High:8'} messageTwo={'Low:6'} containerStyle={highLowWrapper} messageOneStyle={highLow} messageTwoStyle={highLow} />
+        <Feather name={weatherType[weatherCondition]?.icon} size={100} color="white" />
+        <Text style={tempStyles}>{temp}°</Text>
+        <Text style={feels}>{`Feels Like : ${feels_like}`}</Text>
+        <RowText messageOne={`High: ${temp_max}° `} messageTwo={` Low: ${temp_min}°`} containerStyle={highLowWrapper} messageOneStyle={highLow} messageTwoStyle={highLow} />
       </View>
-      <RowText messageOne={'Its sunny'} messageTwo={weatherType['Thunderstorm'].message} containerStyle={bodyWrapper} messageOneStyle={discription} messageTwoStyle={message} />
+      <RowText messageOne={weather[0]?.description.toUpperCase()} messageTwo={weatherType[weatherCondition]?.message} containerStyle={bodyWrapper} messageOneStyle={discription} messageTwoStyle={message} />
     </SafeAreaView>
   )
 }
@@ -30,7 +36,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: "center"
   },
-  temp: {
+  tempStyles: {
     color: 'black',
     fontSize: 48
   },
@@ -52,10 +58,10 @@ const styles = StyleSheet.create({
     marginBottom: 48
   },
   discription: {
-    fontSize: 48
+    fontSize: 43
   },
   message: {
-    fontSize: 30
+    fontSize: 25
   }
 })
 
