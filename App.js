@@ -1,47 +1,86 @@
-import React from "react";
-
-import CurrentWeather from "./src/screens/CurrentWeather";
-import UpcomingWeather from "./src/screens/UpcomingWeather";
-import OurChild from "./src/dummy/OurChild";
-import City from "./src/screens/City"
+import React, {useState, useEffect} from "react";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {Feather} from '@expo/vector-icons'
+import Tabs from "./src/components/Tabs";
+import { View } from "react-native";
+import * as Location from 'expo-location';
+import { WEATHER_API_KEY } from '@env'
 
-
-// Initilizing a Tab object
-const Tab = createBottomTabNavigator()
+// api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
 
 const App = () => {
-  return(
+  const [loading, setLoading] = useState(true)
+  // const [location, setLoaction] = useState(null)
+  const [error, setError] = useState(null)
+  const [lat, setLat] = useState([])
+  const [lon, setLon] = useState([])
+  
+  const [weather, setWeather] = useState([])
+
+  const fetchWeatherData = async () => {
+    try {
+      const res = await fetch(`http:api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`)
+      // The above link is from "openweathermap.org/forecast5" = this is the api link of weatherApi
+      const data = await res.json()
+      setWeather(data)
+    } catch (e) {
+      setError('Could Not fetch Weather')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    (async() => {
+      let {status} = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted'){
+        setError('permission to access location was denied')
+        return;
+      }
+      let location02 = await Location.getCurrentPositionAsync({})
+      setLat(location02.coords.latitude)
+      setLon(location02.coords.longitude)
+      // setLoaction(location)
+      await fetchWeatherData()
+    })();
+    // Since we want to immediately invoke this function we give set of paranthasis () at the end of the async function.
+  }, []);
+  // passing empty array to the useEffect at the last means that there are no dependencies and the useEffect will run once when the component is first rendered.
+
+  if(loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size={'large'} color={'blue'} />
+      </View>
+    )
+  }
+  
+  // if(location) {
+  //   console.log(`Location : ${location}`);
+  // }
+  if(lat) {
+    console.log(`Latitude : ${lat}`);
+  }
+  if(lon) {
+    console.log(`Longitude : ${lon}`);
+  }
+  if(weather) {
+    console.log(`Weather : ${weather}`);
+  }
+
+  return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          tabBarActiveTintColor: 'tomato',
-          tabBarInactiveTintColor: 'grey',
-          tabBarStyle: {
-            marginBottom: 10,
-            marginTop: 5
-          }
-        }}
-      >
-        <Tab.Screen name={'Current'} component={CurrentWeather} options={{
-          tabBarIcon: ({focused}) => <Feather name={'droplet'} size={25} color={focused ? 'tomato' : 'black'} />
-        }}/> 
-        <Tab.Screen name={'Upcoming'} component={UpcomingWeather} options={{
-          tabBarIcon: ({focused}) => (
-            <Feather name={'clock'} size={25} color={focused ? 'tomato' : 'black'} />
-          )
-        }}/> 
-        <Tab.Screen name={'City'} component={City} options={{
-          tabBarIcon: ({focused}) => (
-            <Feather name={'home'} size={25} color={focused ? 'tomato' : 'black'}/>
-          )
-        }}/> 
-      </Tab.Navigator>
+      <Tabs />
     </NavigationContainer>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    flex: 1
+  }
+})
 
 
 export default App

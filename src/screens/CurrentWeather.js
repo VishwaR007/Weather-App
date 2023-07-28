@@ -2,6 +2,8 @@ import React from "react"
 import { View, Text, SafeAreaView, StyleSheet } from "react-native"
 import { Feather } from '@expo/vector-icons';
 import RowText from "../components/RowText";
+// If we are importing a component no need of using courly bracess, but if we are importing an object we need use courly bracess.
+import { weatherType } from "../utilities/weatherType";
 
 const CurrentWeather = () => {
   const {wrapper, container, temp, feels, highLow, highLowWrapper, bodyWrapper, discription, message} = styles
@@ -13,7 +15,7 @@ const CurrentWeather = () => {
         <Text style={feels}>Feels like 5</Text>
         <RowText messageOne={'High:8'} messageTwo={'Low:6'} containerStyle={highLowWrapper} messageOneStyle={highLow} messageTwoStyle={highLow} />
       </View>
-      <RowText messageOne={'Its sunny'} messageTwo={'Its perfect t-shirt weather'} containerStyle={bodyWrapper} messageOneStyle={discription} messageTwoStyle={message} />
+      <RowText messageOne={'Its sunny'} messageTwo={weatherType['Thunderstorm'].message} containerStyle={bodyWrapper} messageOneStyle={discription} messageTwoStyle={message} />
     </SafeAreaView>
   )
 }
